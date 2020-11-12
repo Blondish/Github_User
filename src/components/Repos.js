@@ -26,7 +26,6 @@ const Repos = () => {
   const mostUsed = Object.values(languages).sort((a, b) => {
     return b.value - a.value
   }).slice(0, 5)
-  console.log(mostUsed)
 
   //most starred repo. Map methods allows us to replace value with stars, 
   // as that is what chart data is looking for.
