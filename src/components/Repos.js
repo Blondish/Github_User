@@ -7,24 +7,47 @@ const Repos = () => {
   const { repos } = React.useContext(GithubContext)
 
   let languages = repos.reduce((total, item) => {
-    const { language } = item;
+    const { language, stargazers_count } = item;
     if (language === null) {
       return total
     }
     if (!total[language]) {
-      total[language] = { label: language, value: 1 }
+      total[language] = { label: language, value: 1, stars: stargazers_count }
     } else {
-      total[language] = { ...total[language], value: total[language].value + 1 }
+      total[language] = {
+        ...total[language], value: total[language].value + 1,
+        stars: total[language].stars + stargazers_count
+      }
     }
     return total
   }, {})
 
   // converting the object into array so we can sort the values
-  languages = Object.values(languages).sort((a, b) => {
+  const mostUsed = Object.values(languages).sort((a, b) => {
     return b.value - a.value
   }).slice(0, 5)
-  console.log(languages)
+  console.log(mostUsed)
 
+  //most starred repo. Map methods allows us to replace value with stars, 
+  // as that is what chart data is looking for.
+
+  const mostPopular = Object.values(languages)
+    .sort((a, b) => {
+      return b.stars - a.stars
+    }).map((item) => {
+      return { ...item, value: item.stars }
+    }).slice(0, 5)
+
+  let { stars, forks } = repos.reduce((total, item) => {
+    const { stargazers_count, name, forks } = item;
+    total.stars[stargazers_count] = { label: name, value: stargazers_count }
+    total.forks[forks] = { label: name, value: forks }
+
+    return total
+  }, { stars: {}, forks: {} })
+
+  stars = Object.values(stars).slice(-5).reverse()
+  forks = Object.values(forks).slice(-5).reverse()
 
   const chartData = [
     {
@@ -43,8 +66,11 @@ const Repos = () => {
 
   return <section className="section">
     <Wrapper className="section-center">
-      {/* <ExampleChart data={chartData} />; */}
-      <Pie3D data={languages} />
+
+      <Pie3D data={mostUsed} />
+      <Column3D data={stars} />
+      <Doughnut2D data={mostPopular} />
+      <Bar3D data={forks} />
     </Wrapper>
   </section>
 
